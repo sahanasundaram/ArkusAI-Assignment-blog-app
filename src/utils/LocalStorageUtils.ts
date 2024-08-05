@@ -1,18 +1,13 @@
+// utils/localStorageUtils.ts
 
-interface BlogPost {
-    id: string;
-    title: string;
-    content: string;
-    image?: string;
-    createdAt: string;
-}
+import { BlogPost } from '../types';
 
 export const getPosts = (): BlogPost[] => {
     const posts = localStorage.getItem('posts');
     return posts ? JSON.parse(posts) : [];
 };
 
-export const getPostById = (id: string): BlogPost | undefined => {
+export const getPostById = (id: number): BlogPost | undefined => {
     const posts = getPosts();
     return posts.find(post => post.id === id);
 };
@@ -32,7 +27,7 @@ export const updatePost = (updatedPost: BlogPost) => {
     }
 };
 
-export const deletePost = (id: string) => {
+export const deletePost = (id: number) => {
     const posts = getPosts();
     const filteredPosts = posts.filter(post => post.id !== id);
     localStorage.setItem('posts', JSON.stringify(filteredPosts));

@@ -1,4 +1,3 @@
-// utils/seedData.ts
 
 export const seedData = () => {
     const initialData = [

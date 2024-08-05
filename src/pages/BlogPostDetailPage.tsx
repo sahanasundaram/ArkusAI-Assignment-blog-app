@@ -1,33 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import BlogPostForm from '../components/BlogPostForm';
+import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BlogPost } from '../types';
+import { deletePost, getPostById } from '../utils/LocalStorageUtils';
 
+interface BlogPostDetailProps {
+    post: BlogPost | null;
+}
 
-type RouteParams = Record<string, string | undefined>;
-
-const EditBlogPostPage: React.FC = () => {
-    const { id } = useParams<RouteParams>(); 
-    const [post, setPost] = useState<BlogPost | null>(null);
-    const navigate = useNavigate(); 
-
-    useEffect(() => {
-        axios.get(`/api/posts/${id}`).then(response => {
-            setPost(response.data);
-        });
-    }, [id]);
+const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
+    const navigate = useNavigate();
 
     if (!post) {
-        return <div>Loading...</div>;
+        return <div>Post not found</div>;
     }
 
+    const handleDelete = () => {
+        deletePost(post.id);
+        navigate('/');
+    };
+
     return (
-        <div className="container">
-            <h1>Edit Blog Post</h1>
-            <BlogPostForm initialData={post} isEditing />
+        <div>
+            <h1>{post.title}</h1>
+            <p>{post.content}</p>
+            {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
+            <p>Created at: {new Date(post.createdAt).toLocaleDateString()}</p>
+            <button onClick={() => navigate(`/edit/${post.id}`)}>Edit</button>
+            <button onClick={handleDelete}>Delete</button>
         </div>
     );
 };
 
-export default EditBlogPostPage;
+export default BlogPostDetail;

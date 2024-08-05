@@ -1,31 +1,32 @@
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BlogPost } from '../types';
-import { Link } from 'react-router-dom';
+import { deletePost, getPostById } from '../utils/LocalStorageUtils';
 
 interface BlogPostDetailProps {
     post: BlogPost | null;
-    onDelete: () => void;
 }
 
-const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post, onDelete }) => {
+const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
+    const navigate = useNavigate();
+
     if (!post) {
-        return <div>Loading...</div>;
+        return <div>Post not found</div>;
     }
 
+    const handleDelete = () => {
+        deletePost(post.id);
+        navigate('/');
+    };
+
     return (
-        <div className="blog-post-detail">
+        <div>
             <h1>{post.title}</h1>
-            {post.image && <img src={post.image} alt={post.title} />}
-            <p dangerouslySetInnerHTML={{ __html: post.content }}></p>
-            <p>
-                <small>Created on: {new Date(post.createdAt).toLocaleDateString()}</small>
-            </p>
-            <div className="actions">
-                <Link to={`/edit-post/${post.id}`}>
-                    <button>Edit Post</button>
-                </Link>
-                <button onClick={onDelete}>Delete Post</button>
-            </div>
+            <p>{post.content}</p>
+            {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
+            <p>Created at: {new Date(post.createdAt).toLocaleDateString()}</p>
+            <button onClick={() => navigate(`/edit/${post.id}`)}>Edit</button>
+            <button onClick={handleDelete}>Delete</button>
         </div>
     );
 };

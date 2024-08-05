@@ -1,57 +1,68 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BlogPost } from '../types';
+import { addPost, updatePost } from '../utils/LocalStorageUtils';
 
 interface BlogPostFormProps {
-    initialData?: BlogPost;
     isEditing?: boolean;
+    initialData?: BlogPost;
 }
 
-const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialData, isEditing }) => {
+const BlogPostForm: React.FC<BlogPostFormProps> = ({ isEditing = false, initialData }) => {
     const [title, setTitle] = useState(initialData?.title || '');
     const [content, setContent] = useState(initialData?.content || '');
-    const [image, setImage] = useState(initialData?.image || '');
-    const navigate = useNavigate(); // Use useNavigate instead of useHistory
+    const [image, setImage] = useState(initialData?.imgUrl || '');
+    const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const postData = { title, content, image };
+        const post: BlogPost = {
+            id: isEditing ? parseInt(id!, 10) : Number(Date.now()),
+            title,
+            content,
+            createdAt: initialData?.createdAt || new Date().toISOString(),
+            imgUrl: ''
+        };
 
-        if (isEditing && initialData) {
-            axios.put(`/api/posts/${initialData.id}`, postData).then(() => {
-                navigate(`/post/${initialData.id}`); // Navigate to the updated post's detail page
-            });
+        if (isEditing) {
+            updatePost(post);
         } else {
-            axios.post('/api/posts', postData).then(response => {
-                navigate(`/post/${response.data.id}`); // Navigate to the new post's detail page
-            });
+            addPost(post);
         }
+
+        navigate(`/post/${post.id}`);
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <label htmlFor="title">Title:</label>
-            <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                required
-            />
-            <label htmlFor="content">Content:</label>
-            <ReactQuill value={content} onChange={setContent} />
-            <label htmlFor="image">Image URL:</label>
-            <input
-                type="text"
-                id="image"
-                value={image}
-                onChange={e => setImage(e.target.value)}
-            />
-            <button type="submit">{isEditing ? 'Save Changes' : 'Create Post'}</button>
+            <div>
+                <label>Title</label>
+                <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                />
+            </div>
+            <div>
+                <label>Content</label>
+                <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    required
+                />
+            </div>
+            <div>
+                <label>Image URL</label>
+                <input
+                    type="text"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                />
+            </div>
+            <button type="submit">{isEditing ? 'Update' : 'Create'}</button>
         </form>
     );
 };
