@@ -23,7 +23,8 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ isEditing = false, initialD
             title,
             content,
             createdAt: initialData?.createdAt || new Date().toISOString(),
-            imgUrl: ''
+            imgUrl: '',
+            excerpt: undefined
         };
 
         if (isEditing) {

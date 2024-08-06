@@ -26,7 +26,6 @@ export const updatePost = (updatedPost: BlogPost) => {
         localStorage.setItem('posts', JSON.stringify(posts));
     }
 };
-
 export const deletePost = (id: number) => {
     const posts = getPosts();
     const filteredPosts = posts.filter(post => post.id !== id);
