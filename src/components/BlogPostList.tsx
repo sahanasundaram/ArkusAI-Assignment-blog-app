@@ -1,68 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { BlogPost } from '../types';
 import { getPosts } from '../utils/LocalStorageUtils';
-import './BlogPostList.css';
+import './BlogPostList.css'; // Import the CSS file for styling
 
-const POSTS_PER_PAGE = 5;
+const PAGE_SIZE = 10; // Number of posts per page
 
 const BlogPostList: React.FC = () => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const observer = useRef<IntersectionObserver | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const allPosts = getPosts();
-        setPosts(allPosts);
-    }, []);
+        fetchPosts();
+    }, [currentPage]);
 
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
+    const fetchPosts = async () => {
+        setLoading(true);
+
+        // Simulate fetching posts from local storage or an API
+        const allPosts = getPosts();
+        const offset = (currentPage - 1) * PAGE_SIZE;
+        const newPosts = allPosts.slice(offset, offset + PAGE_SIZE);
+
+        if (newPosts.length < PAGE_SIZE) {
+            setHasMore(false);
+        }
+
+        setPosts(prevPosts => [...prevPosts, ...newPosts]);
+        setLoading(false);
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value.toLowerCase());
+        setCurrentPage(1);
+        setPosts([]);
+        setHasMore(true);
+    };
+
+    const loadMore = () => {
+        if (!loading && hasMore) {
+            setCurrentPage(prevPage => prevPage + 1);
+        }
+    };
+
+    const lastPostRef = (node: HTMLLIElement | null) => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                loadMore();
+            }
+        });
+        
+        if (node) observer.current.observe(node);
     };
 
     const filteredPosts = posts.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase())
+        post.title.toLowerCase().includes(searchTerm)
     );
 
-    const indexOfLastPost = currentPage * POSTS_PER_PAGE;
-    const indexOfFirstPost = indexOfLastPost - POSTS_PER_PAGE;
-    const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
-
-    const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
-
     return (
-        <div className="blog-list-container">
-            <input
-                type="text"
-                placeholder="Search by title"
-                value={searchQuery}
-                onChange={handleSearch}
-                className="search-bar"
-            />
-            <div className="post-list">
-                {currentPosts.map(post => (
-                    <div key={post.id} className="post-card" onClick={() => navigate(`/post/${post.id}`)}>
-                        <h2>{post.title}</h2>
-                        <p>{post.excerpt}</p>
-                        {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
-                    </div>
-                ))}
+        <div className="blog-post-list-container">
+            <h1 className="page-title">Blog Post List</h1>
+            
+            {/* Search bar and create post button */}
+            <div className="search-and-create-container">
+                <input
+                    type="text"
+                    placeholder="Search by title"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="search-input"
+                />
+                <button onClick={() => navigate('/new')} className="create-post-button">
+                    Create New Blog Post
+                </button>
             </div>
-            <div className="pagination">
-                {Array.from({ length: totalPages }, (_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setCurrentPage(index + 1)}
-                        disabled={currentPage === index + 1}
-                        className={`page-button ${currentPage === index + 1 ? 'active' : ''}`}
+
+            {/* List of blog posts */}
+            <ul className="blog-post-list">
+                {filteredPosts.map((post, index) => (
+                    <li
+                        key={post.id}
+                        ref={index === filteredPosts.length - 1 ? lastPostRef : null}
+                        className="blog-post-item"
                     >
-                        {index + 1}
-                    </button>
+                        <Link to={`/post/${post.id}`} className="blog-post-link">
+                            <h2 className="blog-post-title">{post.title}</h2>
+                            {post.imgUrl && <img src={post.imgUrl} alt={post.title} className="blog-post-img" />}
+                            <p className="blog-post-excerpt">{post.content.slice(0, 100)}...</p>
+                        </Link>
+                    </li>
                 ))}
-            </div>
+            </ul>
+
+            {loading && <p className="loading">Loading...</p>}
+            {!hasMore && <p className="no-more-posts">No more posts</p>}
         </div>
     );
 };
 
 export default BlogPostList;
+
