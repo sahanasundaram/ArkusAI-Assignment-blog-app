@@ -35,6 +35,7 @@
   cursor: pointer;
 }
 
+
 @media (max-width: 768px) {
   .blog-post {
       width: 100%;

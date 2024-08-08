@@ -1,48 +1,9 @@
 /* BlogPostList.css */
-.blog-post-list-container {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 20px;
+body {
+    margin: 0;
+    padding: 0;
     font-family: 'Arial', sans-serif;
-    background-color: #f9f9f9; /* Light background for a clean look */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-.page-title {
-    font-size: 2em;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.search-and-create-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.search-input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1em;
-    margin-right: 10px; /* Space between search bar and button */
-}
-
-.create-post-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #007bff;
     color: #fff;
-    font-size: 1em;
-    transition: background-color 0.3s;
-}
-
-.create-post-button:hover {
-    background-color: #0056b3;
 }
 
 .blog-post-list {
@@ -54,37 +15,32 @@
 .blog-post-item {
     border-bottom: 1px solid #ddd;
     padding: 15px 0;
-    display: flex;
-    align-items: center;
+    text-align: center;
 }
 
 .blog-post-link {
     text-decoration: none;
-    color: #333;
-    display: flex;
-    align-items: center;
+    color: inherit; /* Inherit color from parent */
+    display: block;
 }
 
 .blog-post-title {
     font-size: 1.5em;
-    margin: 0;
-    color: #333;
+    margin: 0 0 10px;
 }
 
 .blog-post-img {
-    max-width: 100px;
+    max-width: 100%;
     height: auto;
-    margin-right: 15px;
+    margin: 0 auto 10px;
     border-radius: 4px;
 }
 
 .blog-post-excerpt {
     margin: 0;
-    color: #666;
 }
 
 .loading, .no-more-posts {
     text-align: center;
     padding: 20px;
-    color: #999;
 }

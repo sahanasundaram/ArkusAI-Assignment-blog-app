@@ -1,34 +1,58 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { BlogPost } from '../types';
-import { deletePost, getPostById } from '../utils/LocalStorageUtils';
+import { getPostById, deletePost } from '../utils/LocalStorageUtils';
 
-interface BlogPostDetailProps {
-    post: BlogPost | null;
-}
+type RouteParams = {
+    id?: string;
+};
 
-const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
+const BlogPostDetailPage: React.FC = () => {
+    const { id } = useParams<RouteParams>();
+    const [post, setPost] = useState<BlogPost | null>(null);
     const navigate = useNavigate();
 
-    if (!post) {
-        return <div>Post not found</div>;
-    }
+    useEffect(() => {
+        if (id) {
+            const postId = parseInt(id, 10);
+            const existingPost = getPostById(postId);
+            if (existingPost) {
+                setPost(existingPost);
+            } else {
+                console.error(`Post with ID ${id} not found.`);
+                navigate('/'); // Navigate back to home or a 404 page
+            }
+        }
+    }, [id, navigate]);
 
-    const handleDelete = () => {
-        deletePost(post.id);
-        navigate('/');
+    const handleEdit = () => {
+        if (id) {
+            navigate(`/edit/${id}`);
+        }
     };
 
+    const handleDelete = () => {
+        if (id && window.confirm('Are you sure you want to delete this post?')) {
+            deletePost(parseInt(id, 10));
+            navigate('/'); // Redirect to home page after deletion
+        }
+    };
+
+    if (!post) {
+        return <div>Loading...</div>;
+    }
+
     return (
-        <div>
+        <div className="post-detail-container">
             <h1>{post.title}</h1>
             <p>{post.content}</p>
             {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
+            <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }} />
             <p>Created at: {new Date(post.createdAt).toLocaleDateString()}</p>
-            <button onClick={() => navigate(`/edit/${post.id}`)}>Edit</button>
-            <button onClick={handleDelete}>Delete</button>
+            <button onClick={handleEdit}>Edit</button>
+            <button onClick={handleDelete} style={{ marginLeft: '10px' }}>Delete</button>
         </div>
     );
 };
 
-export default BlogPostDetail;
+export default BlogPostDetailPage;

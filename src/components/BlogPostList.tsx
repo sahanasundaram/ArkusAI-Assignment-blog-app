@@ -1,110 +1,239 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BlogPost } from '../types';
 import { getPosts } from '../utils/LocalStorageUtils';
-import './BlogPostList.css'; // Import the CSS file for styling
+import {
+  Box,
+  Button,
+  TextField,
+  CircularProgress,
+  Typography,
+  Container,
+  Link as MuiLink,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+} from '@mui/material';
+import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
+import './BlogPostList.css';
 
-const PAGE_SIZE = 10; // Number of posts per page
+const PAGE_SIZE_OPTIONS = [5, 10, 20]; // Options for the number of rows per page
+const DEFAULT_PAGE_SIZE = 10; // Default number of posts per page
 
 const BlogPostList: React.FC = () => {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [hasMore, setHasMore] = useState<boolean>(true);
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const observer = useRef<IntersectionObserver | null>(null);
-    const navigate = useNavigate();
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
+  const [rowCount, setRowCount] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchPosts();
-    }, [currentPage]);
-
-    const fetchPosts = async () => {
-        setLoading(true);
-
-        // Simulate fetching posts from local storage or an API
-        const allPosts = getPosts();
-        const offset = (currentPage - 1) * PAGE_SIZE;
-        const newPosts = allPosts.slice(offset, offset + PAGE_SIZE);
-
-        if (newPosts.length < PAGE_SIZE) {
-            setHasMore(false);
-        }
-
-        setPosts(prevPosts => [...prevPosts, ...newPosts]);
-        setLoading(false);
-    };
-
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value.toLowerCase());
-        setCurrentPage(1);
-        setPosts([]);
-        setHasMore(true);
-    };
-
-    const loadMore = () => {
-        if (!loading && hasMore) {
-            setCurrentPage(prevPage => prevPage + 1);
-        }
-    };
-
-    const lastPostRef = (node: HTMLLIElement | null) => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) {
-                loadMore();
-            }
-        });
-        
-        if (node) observer.current.observe(node);
-    };
-
-    const filteredPosts = posts.filter(post =>
-        post.title.toLowerCase().includes(searchTerm)
+  const fetchPosts = useCallback(() => {
+    setLoading(true);
+    const allPosts = getPosts();
+    const filteredPosts = allPosts.filter(post =>
+      post.title.toLowerCase().includes(searchTerm)
     );
+    setRowCount(filteredPosts.length);
+    const paginatedPosts = filteredPosts.slice(
+      paginationModel.page * paginationModel.pageSize,
+      (paginationModel.page + 1) * paginationModel.pageSize
+    );
+    setPosts(paginatedPosts);
+    setLoading(false);
+  }, [paginationModel, searchTerm]);
 
-    return (
-        <div className="blog-post-list-container">
-            <h1 className="page-title">Blog Post List</h1>
-            
-            {/* Search bar and create post button */}
-            <div className="search-and-create-container">
-                <input
-                    type="text"
-                    placeholder="Search by title"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className="search-input"
-                />
-                <button onClick={() => navigate('/new')} className="create-post-button">
-                    Create New Blog Post
-                </button>
-            </div>
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
-            {/* List of blog posts */}
-            <ul className="blog-post-list">
-                {filteredPosts.map((post, index) => (
-                    <li
-                        key={post.id}
-                        ref={index === filteredPosts.length - 1 ? lastPostRef : null}
-                        className="blog-post-item"
-                    >
-                        <Link to={`/post/${post.id}`} className="blog-post-link">
-                            <h2 className="blog-post-title">{post.title}</h2>
-                            {post.imgUrl && <img src={post.imgUrl} alt={post.title} className="blog-post-img" />}
-                            <p className="blog-post-excerpt">{post.content.slice(0, 100)}...</p>
-                        </Link>
-                    </li>
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
+    setPaginationModel({ ...paginationModel, page: 0 });
+  };
+
+  const handlePaginationModelChange = (model: GridPaginationModel) => {
+    setPaginationModel(model);
+  };
+
+  const handlePageSizeChange = (event: SelectChangeEvent<number>) => {
+    const newPageSize = event.target.value as number;
+    setPageSize(newPageSize);
+    setPaginationModel({ page: 0, pageSize: newPageSize });
+  };
+
+  const handleRowClick = (params: any) => {
+    navigate(`/edit/${params.row.id}`);
+  };
+
+  const columns: GridColDef[] = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    {
+      field: 'title',
+      headerName: 'Title',
+      width: 300,
+      renderCell: (params) => (
+        <MuiLink
+          component="button"
+          onClick={() => handleRowClick(params)}
+          underline="none"
+          color="primary"
+        >
+          {params.value}
+        </MuiLink>
+      ),
+    },
+    {
+      field: 'content',
+      headerName: 'Content',
+      width: 500,
+      renderCell: (params) => (
+        <Typography noWrap>{params.value}</Typography>
+      ),
+    },
+    {
+      field: 'imgUrl',
+      headerName: 'Image',
+      width: 150,
+      renderCell: (params) => (
+        params.value ? <img src={params.value} alt="Post" style={{ width: '100%' }} /> : null
+      ),
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Created At',
+      width: 180,
+      renderCell: (params) => (
+        <Typography>{new Date(params.value).toLocaleDateString()}</Typography>
+      ),
+    },
+  ];
+
+  return (
+    <Box
+      sx={{
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '20px',
+        color: '#fff',
+      }}
+    >
+      <Container maxWidth="md">
+        <Box
+          sx={{
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            borderRadius: '8px',
+            padding: '20px',
+            boxShadow: 3,
+            width: '120%',
+            height: '120%',
+            minHeight: '600px',
+          }}
+        >
+          <Typography variant="h4" component="h1" gutterBottom align="center">
+            Blog Post List
+          </Typography>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+            }}
+          >
+            <TextField
+              label="Search by title"
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              sx={{ flexGrow: 1, marginRight: '10px' }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate('/new')}
+            >
+              Create New Blog Post
+            </Button>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '20px',
+            }}
+          >
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel id="page-size-select-label">Rows per page</InputLabel>
+              <Select
+                labelId="page-size-select-label"
+                value={pageSize}
+                onChange={handlePageSizeChange}
+                label="Rows per page"
+              >
+                {PAGE_SIZE_OPTIONS.map(size => (
+                  <MenuItem key={size} value={size}>
+                    {size}
+                  </MenuItem>
                 ))}
-            </ul>
+              </Select>
+            </FormControl>
+          </Box>
 
-            {loading && <p className="loading">Loading...</p>}
-            {!hasMore && <p className="no-more-posts">No more posts</p>}
-        </div>
-    );
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '20px',
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <div style={{ height: 600, width: '100%' }}>
+              <DataGrid
+                rows={posts}
+                columns={columns}
+                pagination
+                paginationMode="server"
+                rowCount={rowCount}
+                paginationModel={paginationModel}
+                onPaginationModelChange={handlePaginationModelChange}
+                onRowClick={handleRowClick}
+                sx={{
+                  '.MuiDataGrid-cell': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  },
+                  '.MuiDataGrid-columnHeaders': {
+                    backgroundColor: '#f5f5f5',
+                  },
+                  '.MuiDataGrid-footerContainer': {
+                    backgroundColor: '#f5f5f5',
+                  },
+                }}
+              />
+            </div>
+          )}
+        </Box>
+      </Container>
+    </Box>
+  );
 };
 
 export default BlogPostList;
-

@@ -35,7 +35,7 @@ const NewBlogPost: React.FC = () => {
             content,
             imgUrl,
             createdAt: new Date().toISOString(),
-            excerpt:null
+            excerpt: null
         };
 
         addPost(newPost);
@@ -56,11 +56,11 @@ const NewBlogPost: React.FC = () => {
                 />
 
                 <label htmlFor="content">Content:</label>
-                <ReactQuill
+                <input
                     id="content"
+                    type="content"
                     value={content}
-                    onChange={setContent}
-                    theme="snow"
+                    onChange={(e) => setContent(e.target.value)}
                 />
 
                 <label htmlFor="imgUrl">Image URL (optional):</label>

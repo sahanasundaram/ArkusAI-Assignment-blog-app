@@ -1,69 +1,64 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { BlogPost } from '../types';
-import { addPost, updatePost } from '../utils/LocalStorageUtils';
 
 interface BlogPostFormProps {
-    isEditing?: boolean;
     initialData?: BlogPost;
+    isEditing?: boolean;
+    onSubmit?: (data: BlogPost) => void;
 }
 
-const BlogPostForm: React.FC<BlogPostFormProps> = ({ isEditing = false, initialData }) => {
+const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialData, isEditing, onSubmit }) => {
     const [title, setTitle] = useState(initialData?.title || '');
     const [content, setContent] = useState(initialData?.content || '');
-    const [image, setImage] = useState(initialData?.imgUrl || '');
-    const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>();
+    const [imgUrl, setImgUrl] = useState(initialData?.imgUrl || '');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        const post: BlogPost = {
-            id: isEditing ? parseInt(id!, 10) : Number(Date.now()),
-            title,
-            content,
-            createdAt: initialData?.createdAt || new Date().toISOString(),
-            imgUrl: '',
-            excerpt: undefined
-        };
-
-        if (isEditing) {
-            updatePost(post);
-        } else {
-            addPost(post);
+    
+        if (onSubmit) {
+            const postToSubmit: BlogPost = {
+                id: initialData?.id || 0,
+                title,
+                content,
+                imgUrl,
+                createdAt: initialData?.createdAt || new Date().toISOString(),
+                excerpt: initialData?.excerpt, // Use the existing excerpt or leave it undefined
+            };
+    
+            onSubmit(postToSubmit);
         }
-
-        navigate(`/post/${post.id}`);
     };
-
     return (
         <form onSubmit={handleSubmit}>
-            <div>
-                <label>Title</label>
-                <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                />
-            </div>
-            <div>
-                <label>Content</label>
-                <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
-                />
-            </div>
-            <div>
-                <label>Image URL</label>
-                <input
-                    type="text"
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                />
-            </div>
-            <button type="submit">{isEditing ? 'Update' : 'Create'}</button>
+            <label htmlFor="title">Title:</label>
+            <input
+                id="title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+            />
+
+            <label htmlFor="content">Content:</label>
+            <input
+                id="content"
+                value={content}
+                onChange={(e)=>setContent(e.currentTarget.value)}
+            />
+
+            <label htmlFor="imgUrl">Image URL (optional):</label>
+            <input
+                id="imgUrl"
+                type="text"
+                value={imgUrl}
+                onChange={(e) => setImgUrl(e.target.value)}
+            />
+
+            <button type="submit" className="submit-button">
+                {isEditing ? 'Update' : 'Create'}
+            </button>
         </form>
     );
 };
