@@ -1,0 +1,65 @@
+/* BlogPostDetailPage.css */
+.post-detail-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+}
+
+.post-detail-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.post-detail-container h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #333333;
+    text-align: center;
+}
+
+.post-detail-container .post-content {
+    font-size: 1.125em;
+    line-height: 1.6;
+    color: #4a4a4a;
+    margin-bottom: 30px;
+    word-wrap: break-word;
+}
+
+.post-detail-container p {
+    color: #777777;
+    font-style: italic;
+    font-size: 0.9em;
+    text-align: right;
+}
+
+.post-detail-container button {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    margin-right: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.post-detail-container button:hover {
+    background-color: #0056b3;
+}
+
+.post-detail-container button.delete-button {
+    background-color: #dc3545;
+}
+
+.post-detail-container button.delete-button:hover {
+    background-color: #c82333;
+}
+

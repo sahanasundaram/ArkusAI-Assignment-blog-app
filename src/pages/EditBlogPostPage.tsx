@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import BlogPostForm from '../components/BlogPostForm';
 import { BlogPost } from '../types';
 import { getPostById, updatePost } from '../utils/LocalStorageUtils';
+import './EditBlogPostPage.css'; // Import the CSS file
 
 type RouteParams = {
-    id?: string; // The id parameter is optional
+    id?: string;
 };
 
 const EditBlogPostPage: React.FC = () => {
@@ -31,7 +32,7 @@ const EditBlogPostPage: React.FC = () => {
     };
 
     if (!post) {
-        return <div>Loading...</div>;
+        return <div className="loading">Loading...</div>;
     }
 
     return (
@@ -43,4 +44,3 @@ const EditBlogPostPage: React.FC = () => {
 };
 
 export default EditBlogPostPage;
-

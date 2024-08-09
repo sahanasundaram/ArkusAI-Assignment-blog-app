@@ -94,7 +94,14 @@ const BlogPostList: React.FC = () => {
       headerName: 'Content',
       width: 500,
       renderCell: (params) => (
-        <Typography noWrap>{params.value}</Typography>
+        <MuiLink
+        component="button"
+        onClick={() => handleRowClick(params)}
+        underline="none"
+        color="primary"
+      >
+        {params.value}
+      </MuiLink>
       ),
     },
     {

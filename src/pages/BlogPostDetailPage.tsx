@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { BlogPost } from '../types';
 import { getPostById, deletePost } from '../utils/LocalStorageUtils';
+import './BlogPostDetailPage.css'; // Import the CSS file
 
 type RouteParams = {
     id?: string;
@@ -37,6 +38,9 @@ const BlogPostDetailPage: React.FC = () => {
             navigate('/'); // Redirect to home page after deletion
         }
     };
+    const handleSave=()=> {
+        navigate('/');
+    }
 
     if (!post) {
         return <div>Loading...</div>;
@@ -45,12 +49,12 @@ const BlogPostDetailPage: React.FC = () => {
     return (
         <div className="post-detail-container">
             <h1>{post.title}</h1>
-            <p>{post.content}</p>
             {post.imgUrl && <img src={post.imgUrl} alt={post.title} />}
             <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }} />
             <p>Created at: {new Date(post.createdAt).toLocaleDateString()}</p>
             <button onClick={handleEdit}>Edit</button>
-            <button onClick={handleDelete} style={{ marginLeft: '10px' }}>Delete</button>
+            <button onClick={handleDelete} className="delete-button">Delete</button>
+            <button onClick={handleSave}>Save</button>
         </div>
     );
 };

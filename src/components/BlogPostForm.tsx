@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import './BlogPostForm.css'; // Import the CSS file
 import { BlogPost } from '../types';
 
 interface BlogPostFormProps {
@@ -24,14 +24,15 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialData, isEditing, onS
                 content,
                 imgUrl,
                 createdAt: initialData?.createdAt || new Date().toISOString(),
-                excerpt: initialData?.excerpt, // Use the existing excerpt or leave it undefined
+                excerpt: initialData?.excerpt,
             };
     
             onSubmit(postToSubmit);
         }
     };
+
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="blog-post-form">
             <label htmlFor="title">Title:</label>
             <input
                 id="title"
@@ -45,7 +46,7 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialData, isEditing, onS
             <input
                 id="content"
                 value={content}
-                onChange={(e)=>setContent(e.currentTarget.value)}
+                onChange={(e) => setContent(e.currentTarget.value)}
             />
 
             <label htmlFor="imgUrl">Image URL (optional):</label>
