@@ -26,7 +26,7 @@ const NewBlogPost: React.FC = () => {
         }
 
         // Generate a unique ID for the new post
-        const posts = getPosts();
+        const posts = getPosts() || []; // Ensure getPosts returns an array
         const newId = posts.length > 0 ? Math.max(...posts.map(post => post.id)) + 1 : 1;
 
         const newPost: BlogPost = {
@@ -58,7 +58,7 @@ const NewBlogPost: React.FC = () => {
                 <label htmlFor="content">Content:</label>
                 <input
                     id="content"
-                    type="content"
+                    type="text"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                 />

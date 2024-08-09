@@ -13,14 +13,12 @@ const App: React.FC = () => {
     seedData(); // Seed the initial data
 
     return (
-        <Router>
             <Routes>
                 <Route path="/" element={<BlogPostList />} />
                 <Route path="/post/:id" element={<PostWrapper />} />
                 <Route path="/new" element={<NewBlogPost />} />
                 <Route path="/edit/:id" element={<EditPostWrapper />} />
             </Routes>
-        </Router>
     );
 };
 

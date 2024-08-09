@@ -2,10 +2,12 @@
 
 import { BlogPost } from '../types';
 
+// LocalStorageUtils.ts
 export const getPosts = (): BlogPost[] => {
-    const posts = localStorage.getItem('posts');
-    return posts ? JSON.parse(posts) : [];
+    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+    return Array.isArray(posts) ? posts : [];
 };
+
 
 export const getPostById = (id: number): BlogPost | undefined => {
     const posts = getPosts();
